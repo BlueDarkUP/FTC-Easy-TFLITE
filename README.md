@@ -282,12 +282,8 @@
     ```
     这一次，您应该会看到**所有检查全部通过 (`✅`)**！这证明模型已经包含了所有必需的元数据。
 
-4.  **(新) 创建完整的部署包**:
-    为了方便交付，我们提供了一个脚本，可以将所有重要文件打包成一个 ZIP 文件。
-    ```bash
-    python3 create_ftc_deployment_package.py final_output/
-    ```
-    这会在 `final_output/` 文件夹中创建一个名为 `FTC_Deployment_Package.zip` 的文件。这个 ZIP 包包含了：
+
+4.  运行打包脚本会在 `final_output/` 文件夹中创建一个名为 `FTC_Deployment_Package.zip` 的文件。这个 ZIP 包包含了：
     *   最终的 `..._ftc_ready.tflite` 模型文件。
     *   `...labels.txt` 标签文件，方便程序员参考。
     *   `pipeline_file.config` 训练配置文件，用于追溯。
