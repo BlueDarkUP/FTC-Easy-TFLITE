@@ -157,8 +157,18 @@
     ```bash
     ./04_apply_tf_slim_patch.sh
     ```
+2.  **设置训练参数并生成配置文件 (关键步骤)**:
+    可以在这里修改 batch_size 和 num_steps
+    ```bash
+    export batch_size=4
+    export num_steps=10000
+    echo "batch_size: $batch_size"
+    echo "num_steps: $num_steps"
+    python3 create_config.py
+    echo "配置文件已生成: ${HOMEFOLDER}/models/mymodel/pipeline_file.config"
+    ```
 
-2.  **（可选）启动 TensorBoard 监控**：
+3.  **（可选）启动 TensorBoard 监控**：
     为了实时可视化训练过程（例如损失函数的变化），请**打开一个新的 WSL 终端**，并执行以下命令：
     ```bash
     # 在新终端中...
@@ -171,7 +181,7 @@
     ```
     然后，在您的 **Windows 浏览器** 中打开它提供的 `http://localhost:6006/` 链接。
 
-3.  **在原始终端中启动训练！**
+4.  **在原始终端中启动训练！**
     ```bash
     # 在第一个终端中...
     # 设置最后的路径变量
