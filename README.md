@@ -44,7 +44,7 @@
     # 切换到 D 盘
     cd /mnt/d/
     # 克隆您的仓库 (请将 <URL> 替换为实际链接)
-    git clone <您的仓库HTTPS或SSH链接> FTC_Training
+    git clone https://github.com/BlueDarkUP/FTC-Easy-TFLITE.git FTC_Training
     # 进入项目目录
     cd FTC_Training
     # 设置项目主目录为环境变量，方便后续使用
