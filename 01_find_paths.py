@@ -37,16 +37,21 @@ def set_tfrecord_variables(directory):
 
     return train_record_fname, val_record_fname, label_map_pbtxt_fname
 
-HOMEFOLDER = '/mnt/d/FTC_Training/'
+# --- 修改的部分 ---
+# 从环境变量获取 HOMEFOLDER，如果不存在则使用当前目录 '.'
+HOMEFOLDER = os.getenv('HOMEFOLDER', '.') 
+# --- 修改结束 ---
+
 train_record_fname, val_record_fname, label_map_pbtxt_fname = set_tfrecord_variables(HOMEFOLDER)
 
 print("找到的训练记录文件:", train_record_fname)
 print("找到的验证记录文件:", val_record_fname)
 print("找到的标签映射文件:", label_map_pbtxt_fname)
 
+# 将 path_vars.sh 文件生成在 HOMEFOLDER 目录下
 with open(os.path.join(HOMEFOLDER, 'path_vars.sh'), 'w') as f:
     f.write(f'export train_record_fname="{train_record_fname}"\n')
     f.write(f'export val_record_fname="{val_record_fname}"\n')
     f.write(f'export label_map_pbtxt_fname="{label_map_pbtxt_fname}"\n')
 
-print("\n文件路径已保存到 path_vars.sh")
+print(f"\n文件路径已保存到 {os.path.join(HOMEFOLDER, 'path_vars.sh')}")
