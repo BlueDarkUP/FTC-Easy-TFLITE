@@ -43,7 +43,7 @@
     ```bash
     # 切换到 D 盘
     cd /mnt/d/
-    # 克隆您的仓库 (请将 <URL> 替换为实际链接)
+    # 克隆我们的仓库
     git clone https://github.com/BlueDarkUP/FTC-Easy-TFLITE.git FTC_Training
     # 进入项目目录
     cd FTC_Training
