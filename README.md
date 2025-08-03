@@ -1,6 +1,6 @@
 # 本地化 TFLite 物体检测模型训练流水线
 
-这是一个完整的、端到端的教学指南和可执行流水线，旨在帮助您在本地的 Windows Subsystem for Linux (WSL) 环境下，利用 NVIDIA GPU，训练自己的物体检测模型，并最终生成可用于部署的高性能 TFLite 文件。
+这是一个完整的、端到端的教学指南和可执行流水线，旨在帮助您在本地的 Windows Subsystem for Linux (WSL) 环境下，利用 NVIDIA GPU，训练自己的物体检测模型，并最终生成一个**完全符合 FIRST Tech Challenge (FTC) 规范的、可直接部署的**高性能 TFLite 模型。
 
 本流水线基于 TensorFlow 2 Object Detection API，并使用了经过测试的稳定版本组合，同时集成了 TensorRT 和 TensorBoard 监控，以确保提供一个专业、高效且可复现的开发体验。用户只需克隆本仓库，准备好数据集，然后按顺序执行指令即可。
 
@@ -15,8 +15,10 @@
 *   [第四步：开始训练与监控](#第四步开始训练与监控)
 *   [第五步：导出为 TFLite 模型](#第五步导出为-tflite-模型)
 *   [第六步：模型量化 (INT8)](#第六步模型量化-int8)
-*   [第七步：打包最终产物](#第七步打包最终产物)
-*   [附录：开启新模型的训练 (清理工作区)](#附录开启新模型的训练-清理工作区)
+*   [**第七步：验证模型元数据 (FTC 关键步骤)**](#第七步验证模型元数据-ftc-关键步骤)
+*   [**第八步：打包为 FTC 就绪模型 (最终交付)**](#第八步打包为-ftc-就绪模型-最终交付)
+*   [附录 A：开启新模型的训练 (清理工作区)](#附录-a开启新模型的训练-清理工作区)
+*   [附录 B：通用模型打包选项](#附录-b通用模型打包选项)
 *   [故障排除 (FAQ)](#故障排除-faq)
 
 ---
@@ -178,8 +180,7 @@
     conda activate ftc_train
     # 3. 启动 TensorBoard，指向训练日志目录
     tensorboard --logdir ./training_progress/
-    ```
-    然后，在您的 **Windows 浏览器** 中打开它提供的 `http://localhost:6006/` 链接。
+    ```    然后，在您的 **Windows 浏览器** 中打开它提供的 `http://localhost:6006/` 链接。
 
 4.  **在原始终端中启动训练！**
     ```bash
@@ -238,40 +239,68 @@
 
 ---
 
-## 第七步：打包最终产物
+## **第七步：验证模型元数据 (FTC 关键步骤)**
 
-根据您的部署目标，选择相应的打包方式。
+在将模型部署到机器人之前，我们**必须**验证它是否包含了 FTC SDK 所需的元数据。缺少元数据是导致 FTC App 崩溃（`task_vision_jni` 错误）的**首要原因**。
 
-### **选项 A：为 Control Hub (CPU/GPU) 打包**
+本仓库提供了一个名为 `ftc_model_inspector.py` 的独立诊断工具，它**无需 `tflite-support` 库**，可以直接检查模型是否包含元数据。
 
-这是您的主要目标。我们将打包最重要的文件。
-```bash
-./09a_package_for_cpu.sh
-```
-这将创建一个名为 `control_hub_model.zip` 的文件，其中包含了：
-*   `limelight_neural_detector_8bit.tflite` (CPU推理首选)
-*   `limelight_neural_detector_32bit.tflite` (高质量备份)
-*   `limelight_neural_detector_labels.txt` (必需品)
-*   `pipeline_file.config` (用于追溯)
-*   `saved_model/` 文件夹 (用于未来可能的TensorRT优化)
+1.  **运行检查脚本**：
+    我们将检查刚刚生成的 8位量化模型。
+    ```bash
+    python3 ftc_model_inspector.py final_output/limelight_neural_detector_8bit.tflite
+    ```
 
-### **选项 B：为 Limelight (Google Coral) 打包**
-
-如果您也想在带有 Coral TPU 的 Limelight 上使用，请执行此步骤。
-```bash
-./09b_package_for_coral.sh
-```
-这会额外安装 Coral 编译器，将 `8bit` 模型编译为 `_edgetpu` 版本，并打包所有模型。
-
-**恭喜！** 您的模型现在已经准备好部署了。
+2.  **解读结果**：
+    由于我们的模型是刚刚从 TensorFlow 检查点转换而来的，它**不包含任何元数据**。因此，您应该会看到类似下面的**预期错误**：
+    ```
+    --- [元数据独立检查] ---
+    ❌ [严重问题] 此 .tflite 文件不包含任何元数据。
+    ```
+    **看到这个结果是完全正常的！** 这恰恰证明了下一步打包操作的必要性。它告诉我们，这个“裸”模型还不能直接在 FTC 上使用。
 
 ---
 
-## 附录：开启新模型的训练 (清理工作区)
+## **第八步：打包为 FTC 就绪模型 (最终交付)**
+
+这是将您的模型转化为可在 Control Hub 上直接使用的**最后一步，也是最重要的一步**。我们将使用 `package_ftc_model_standalone.py` 脚本，它会为您的模型“粘合”上所有必需的元数据（归一化参数和标签文件）。
+
+1.  **运行打包脚本**：
+    此脚本会自动查找所需的文件，并生成一个全新的、符合 FTC 规范的模型。
+    ```bash
+    python3 package_ftc_model_standalone.py final_output/
+    ```
+
+2.  **获取最终产物**：
+    脚本执行成功后，会在 `final_output` 文件夹中生成一个名为 `limelight_neural_detector_8bit_ftc_ready.tflite` 的文件。
+    **这个 `_ftc_ready.tflite` 文件，就是您唯一需要上传到机器人控制器上的模型文件。**
+
+3.  **（可选但强烈推荐）最终验证**：
+    为了百分百放心，让我们用检查器再次检查这个新生成的“FTC 就绪”模型。
+    ```bash
+    python3 ftc_model_inspector.py final_output/limelight_neural_detector_8bit_ftc_ready.tflite
+    ```
+    这一次，您应该会看到**所有检查全部通过 (`✅`)**！这证明模型已经包含了所有必需的元数据。
+
+4.  **(新) 创建完整的部署包**:
+    为了方便交付，我们提供了一个脚本，可以将所有重要文件打包成一个 ZIP 文件。
+    ```bash
+    python3 create_ftc_deployment_package.py final_output/
+    ```
+    这会在 `final_output/` 文件夹中创建一个名为 `FTC_Deployment_Package.zip` 的文件。这个 ZIP 包包含了：
+    *   最终的 `..._ftc_ready.tflite` 模型文件。
+    *   `...labels.txt` 标签文件，方便程序员参考。
+    *   `pipeline_file.config` 训练配置文件，用于追溯。
+
+**恭喜！** 现在，您只需将这个 `FTC_Deployment_Package.zip` 文件交给负责机器人编程的同学，他们就拥有了部署和编程所需的一切。
+
+---
+
+## **附录 A：开启新模型的训练 (清理工作区)**
 
 当您成功完成一个模型的训练和打包，并希望开始一个全新的项目（例如，使用一个完全不同的数据集）时，执行以下清理步骤是一个好习惯。这可以确保旧的配置文件、数据集和模型检查点不会干扰到您的新训练。
 
-**警告**：此操作会**永久删除**您的数据集、训练进度和所有输出文件。在运行之前，请确保您已经备份了需要保留的任何产物（例如 `control_hub_model.zip`）。
+**警告**：此操作会**永久删除**您的数据集、训练进度和所有输出文件。在运行之前，请确保您已经备份了需要保留的任何产物（例如 `FTC_Deployment_Package.zip`）。
 
 ### **清理步骤**
 
@@ -296,7 +325,7 @@
 *   `extracted_samples/`: 用于量化的样本图像。
 *   `train/`, `valid/`, `test/`: 从 `dataset.zip` 解压出的数据集文件夹。
 *   `dataset.zip`: 您上传的数据集压缩包。
-*   `*.zip`: 所有打包好的模型压缩文件，例如 `control_hub_model.zip`。
+*   `*.zip`: 所有打包好的模型压缩文件，例如 `FTC_Deployment_Package.zip`。
 *   `*.txt`, `*.config`, `*.sh`: 所有由脚本生成的配置文件和标签文件。
 
 ### **清理后如何开始新训练？**
@@ -304,6 +333,26 @@
 在运行完清理脚本后，您的工作目录就恢复到了一个“干净”的状态（只剩下核心的项目脚本和 `models` 文件夹）。
 
 您可以直接从 **[第二步：准备您的数据集](#第二步准备您的数据集)** 开始，上传并解压您的**新** `dataset.zip` 文件，然后继续执行后续的所有步骤，来训练您的下一个模型。
+
+---
+
+## **附录 B：通用模型打包选项**
+
+如果您需要为非 FTC 的平台（例如 Limelight）打包，或者需要一个包含所有模型变体（32位、8位、EdgeTPU）的通用包，您可以使用本仓库提供的原始打包脚本。
+
+**警告**：这些脚本生成的 `.tflite` 文件**不包含 FTC 所需的元数据**，不能直接在 Control Hub 上使用！
+
+### **选项 A：为通用 CPU/GPU 打包**
+```bash
+./09a_package_for_cpu.sh
+```
+这将创建一个 `control_hub_model.zip` 文件，其中包含 32位和8位模型、标签和配置文件。
+
+### **选项 B：为 Limelight (Google Coral) 打包**
+```bash
+./09b_package_for_coral.sh
+```
+这会额外安装 Coral 编译器，将 8位模型编译为 `_edgetpu` 版本，并打包所有模型。
 
 ---
 
