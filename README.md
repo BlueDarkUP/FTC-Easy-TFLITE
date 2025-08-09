@@ -1,3 +1,7 @@
+### 阅读之前：还没有TFRecord数据集？
+  - #### 使用[Zero2YoloYard](https://github.com/BlueDarkUP/Zero2YoloYard)轻松且智能的标注数据
+  - #### 使用[Yolo2TFRecord](https://github.com/BlueDarkUP/Yolo2TFRecord)轻松的将YOLOv8格式数据集转换为TFRecord
+
 # 本地化 TFLite 物体检测模型训练流水线
 
 这是一个完整的、端到端的教学指南和可执行流水线，旨在帮助您在本地的 Windows Subsystem for Linux (WSL) 环境下，利用 NVIDIA GPU，训练自己的物体检测模型，并最终生成一个**完全符合 FIRST Tech Challenge (FTC) 规范的、可直接部署的**高性能 TFLite 模型。
