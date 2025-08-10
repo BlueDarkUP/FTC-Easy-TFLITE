@@ -115,7 +115,7 @@
 ## 第二步：准备您的数据集
 
 1.  **获取数据**:
-    *   本项目需要使用 `TFRecord` 格式的数据集。我们强烈推荐使用 [Roboflow](https://roboflow.com/) 来标注、管理和导出您的数据。在导出时，选择 `TensorFlow TFRecord` 格式。
+    *   本项目需要使用 `TFRecord` 格式的数据集。我们强烈推荐使用 [Zero2YoloYard](https://github.com/BlueDarkUP/Zero2YoloYard) 来标注、管理和导出您的数据。在导出时，选择 `TensorFlow TFRecord` 格式。
     *   您将得到一个 `.zip` 文件。
 
 2.  **放置并解压数据**:
