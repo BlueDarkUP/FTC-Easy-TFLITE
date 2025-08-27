@@ -66,7 +66,46 @@ This step will download the project files, create a separate Python environment 
     conda create -n ftc_train python=3.10 -y
     conda activate ftc_train
     ```
+---
 
+### **Common Conda Environment Activation Issue**
+
+When attempting to activate a Conda environment using the `conda activate` command, you might encounter the following error:
+
+```
+CondaError: Run 'conda init' before 'conda activate'
+```
+
+**Explanation of the Issue:**
+This error indicates that Conda has not been properly initialized in your current shell session. The `conda activate` command relies on certain functions and variables being set up by Conda within your shell environment. The `conda init` command is responsible for adding these necessary settings to your shell configuration file, allowing Conda to function correctly.
+
+**Solutions:**
+
+You can resolve this issue using one of the following two methods:
+
+1.  **Permanent Setup (Recommended):**
+    Run the `conda init` command to modify your shell configuration file (e.g., `.bashrc`, `.zshrc`, etc.). This will ensure that Conda is correctly initialized every time you open a new terminal session.
+
+    ```bash
+    conda init bash
+    # If you are using zsh, you might run: conda init zsh
+    ```
+    After running this command, you will likely need to **close and reopen your terminal**, or run `source ~/.bashrc` (or the appropriate shell configuration file) for the changes to take effect.
+
+2.  **Temporary Setup (Current Session Only):**
+    If you prefer not to modify your shell configuration file, or just need a quick fix for the current terminal session, you can manually `source` Conda's initialization script. Please adjust the path below according to your Miniconda/Anaconda installation:
+
+    ```bash
+    source ~/miniconda3/etc/profile.d/conda.sh
+    # Or based on your actual installation path:
+    # source /path/to/your/anaconda3/etc/profile.d/conda.sh
+    ```
+    After executing this command, you should be able to use the `conda activate` command immediately. Please note that this method is only effective for the current terminal session; you will need to run it again if you close and reopen your terminal.
+
+**Recommendation:**
+To avoid repeatedly encountering this issue, it is highly recommended to use the first method (`conda init bash`) for a permanent setup.
+
+---
 4.  **Install TensorFlow, TensorRT, and CUDA (Core Step)**:
     We will install in two steps to ensure compatibility. First install TensorRT, then TensorFlow; `pip` will automatically handle version dependencies.
     ```bash
