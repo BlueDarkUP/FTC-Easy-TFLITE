@@ -66,6 +66,48 @@
     conda create -n ftc_train python=3.10 -y
     conda activate ftc_train
     ```
+好的，这是一个你可以在你的文档中添加的范例，使用 Markdown 格式，这种格式在 GitHub README、Wiki 或大多数技术文档中都很常见：
+
+---
+
+### **常见 Conda 环境激活问题**
+
+在使用 `conda activate` 命令激活 Conda 环境时，您可能会遇到以下错误：
+
+```
+CondaError: Run 'conda init' before 'conda activate'
+```
+
+**原因解释：**
+这个错误表示 Conda 尚未在您当前的 shell 会话中正确初始化。`conda activate` 命令依赖于 Conda 在您的 shell 环境中设置的一些特殊函数和变量。`conda init` 命令会负责将这些设置添加到您的 shell 配置文件中，以便 Conda 能够正常工作。
+
+**解决方案：**
+
+您可以通过以下两种方法之一来解决此问题：
+
+1.  **永久性设置（推荐）：**
+    运行 `conda init` 命令来修改您的 shell 配置文件（例如 `.bashrc`, `.zshrc` 等）。这将确保在您每次打开新的终端会话时，Conda 都能被正确初始化。
+
+    ```bash
+    conda init bash
+    # 如果您使用的是 zsh，可以运行：conda init zsh
+    ```
+    运行此命令后，您可能需要**关闭并重新打开您的终端**，或者运行 `source ~/.bashrc` (或相应的 shell 配置文件) 使更改生效。
+
+2.  **临时性设置（仅对当前会话有效）：**
+    如果您不想修改 shell 配置文件，或者只是想在当前终端会话中快速解决问题，您可以手动 `source` Conda 的初始化脚本。请根据您的 Miniconda/Anaconda 安装路径调整以下命令：
+
+    ```bash
+    source ~/miniconda3/etc/profile.d/conda.sh
+    # 或者根据您的实际安装路径：
+    # source /path/to/your/anaconda3/etc/profile.d/conda.sh
+    ```
+    运行此命令后，您应该可以立即使用 `conda activate` 命令了。请注意，这种方法只对当前的终端会话有效，当您关闭终端并重新打开时，需要再次执行此命令。
+
+**建议：**
+为了避免反复遇到此问题，强烈建议您使用第一种方法 (`conda init bash`) 进行永久性设置。
+
+---
 
 4.  **安装 TensorFlow、TensorRT 及 CUDA (核心步骤)**：
     我们将分两步安装，以确保兼容性。首先安装 TensorRT，然后安装 TensorFlow，`pip` 会自动处理版本依赖。
